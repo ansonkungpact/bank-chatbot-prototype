@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+
+    <style>
+    .login_form {
+        border: 2px solid #f1f1f1;
+        max-width: 300px;
+        margin: auto;
+        padding: 12px;
+    }
+
+    input[type=text], input[type=password] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    span.psw {
+        padding-top: 16px;
+    }
+    </style>
+</head>
+<body>
+<script>
+
+    function validate(){
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+
+        var myJSON = '{ "users": [{"username":"pactera", "password":123},{"username":"pho", "password":500}] }';
+
+        var myObj = JSON.parse(myJSON);
+
+        for (i in myObj.users) {
+
+            if ( username == myObj.users[i]['username'] && password == myObj.users[i]['password']){
+                alert ("Login successfully");
+                //window.location = ""; //redirecting to other page
+                return false;
+            }
+        }
+        alert ("Login fail");
+    }
+
+</script>
+
+<form class="login_form">
+    <label><b>Username</b></label>
+    <input type="text" placeholder="Enter Username" name="username" id="username" required>
+
+    <label><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="password" id="password" required>
+        
+    <button type="button" id="submit" onclick="validate()">Login</button>
+</form>
+
+</body>
+</html>
