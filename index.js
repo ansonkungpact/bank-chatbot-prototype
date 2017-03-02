@@ -23,13 +23,17 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 const INDEX = path.join(__dirname, '/public/clientchat/index-clientchat.html');
-const INDEXB = path.join(__dirname, '/public/app/login.html');
+const INDEXB = path.join(__dirname, '/public/login/index.html');
 
 const server = express()
   .use(preAuth.connect(basic))
   .use(express.static('public'))
-  .get('/', function(req, res){
+  .get('/chatbot', function(req, res){
      res.sendFile(INDEX);
+  })
+  .use(express.static('public'))
+  .get('/', function(req, res){
+     res.sendFile(INDEXB);
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
