@@ -4,13 +4,51 @@ var luisModule = require('./luisModule.js');
 /*****
 Globally declared random set of questions
 ****/
-
 const QUESTIONS = {
 	"START_QUESTION": [
-		"How can I help you today?"
+		"Hello Mr. Woo, how can I help you today?"
 	],
 	"RESTART_QUESTION": [
 		"What can I help you with?"
+	],
+	"LOST_CARD_1": [
+		"I'm sorry to hear that. I can definitely help you with canceling and issuing a new card."
+	],
+	"LOST_CARD_2": [
+		"But first, just to verify who you are, I will need to ask you a security question."
+	],
+	"LOST_CARD_3": [
+		"In which city were you born?"
+	],
+	"BORN_LOCATION_1": [
+		"Great. Thank you, Mr. Woo."
+	],
+	"BORN_LOCATION_2": [
+		"Now, can you tell me when the card was lost?"
+	],
+	"LOST_DATE": [
+		"Thank you. So just to confirm, was the card lost as of "
+	],
+	"CARD_REVIEW_1": [
+		"Ok, got it. The good news is that since you are reporting your loss promptly, you will not be responsible for any unauthorised charges. "
+	],
+	"CARD_REVIEW_2": [
+		"I do see, however, that there are some transactions dated since [#Date]. Would you like to review them?"
+	],
+	"TRANSACTION": [
+		"There is a transaction on 2-Mar for HKD 255.00 at Fortress. Is this an authorized charge?"
+	],
+	"TRANSACTION_AUTH_1": [
+		"Great. In that case, we will process this transaction as usual."
+	],
+	"TRANSACTION_AUTH_2": [
+		"There is another transaction here for HKD 888.00 at Lucky Fortunes. Is this an authorized charge?"
+	],
+	"INVERTIGATE": [
+		"I see. In that case, we will investigate further and let you know shortly."
+	],
+	"CARD_CANCEL": [
+		"I will now go ahead and cancel your card and send you a new one."
 	],
 	"ASK_FOR_COVERAGE":[
 		"What type of coverage would you like to inquire about? (Hospitalization, Outpatient, or Dental)"
@@ -78,7 +116,7 @@ const QUESTIONS = {
 		"I see here that you have an Employee Benefits Health policy with us at FWD. What type of coverage would you like to inquire about? (Hospitalization, Outpatient, or Dental)"
 	],
 	"RESTART":[
-		"Do you want to ask another question?"
+		"Is there anything else I can help with?"
 	],
 	"THANK_YOU":[
 		"What else can I help you with?"
@@ -94,6 +132,9 @@ const QUESTIONS = {
 	],
 	"HEALTH_POLICY_OPTION":[
 		"Please refer to this: <a href='https://www.ftlife.com.hk/tc/products/find-my-insurance.html' target='_blank'> https://www.ftlife.com.hk/tc/products/find-my-insurance.html </a>"
+	],
+	"BYE_BYE":[
+		"Thank you. Bye bye."
 	]
 
 };
@@ -113,7 +154,7 @@ var cCalculatorModule = function (){
 	var extractsFromQuestion = {};
 	var isLog = true;
 	// set by default infant question to yes
-	extractsFromQuestion.QTAG5 = 'yes';
+	// extractsFromQuestion.QTAG5 = 'yes';
 	var responseCallback = null;
 	var currentQuestion = "";
 	var currentQuestionBackup;
@@ -232,12 +273,13 @@ var cCalculatorModule = function (){
 			getClassifier(question,function(classifierResponse){
 				var intent = classifierResponse["intent"];
 				console.log("intent:::"+intent);
-				if (intent == "medicalIntent") {
+				if(intent == "greeting" || intent == "none"){
+					callback("START_QUESTION");
+				} else if (intent == "lostCard") {
 					isCalculationInProgress = true;
 					calculateInformation(question,classifierResponse);
-				} else if(intent == "greetings"){
-					callback("Hello");
-					callback("START_QUESTION");
+				} else if(isCalculationInProgress) {
+					calculateInformation(question,classifierResponse);
 				}
 				else {
 					//seems some other intent
@@ -291,16 +333,16 @@ var cCalculatorModule = function (){
 			extractsFromQuestion.QTAG2 == null &&
 			extractsFromQuestion.QTAG3 == null &&
 			extractsFromQuestion.QTAG4 == null && 
-			extractsFromQuestion.INTENT == null){
-			
-			extractsFromQuestion.INTENT = "MEDICAL_INTENT";
-			callback("HAPPY_TO_HELP");
+			extractsFromQuestion.QTAG5 == null && 
+			extractsFromQuestion.QTAG6 == null){
+			// callback("HAPPY_TO_HELP");
 			extractionOfParameters(question,classifierResponse);
 		}else if(extractsFromQuestion.QTAG1 == null ||
 			extractsFromQuestion.QTAG2 == null ||
 			extractsFromQuestion.QTAG3 == null ||
 			extractsFromQuestion.QTAG4 == null ||
-			extractsFromQuestion.QTAG5 == null){
+			extractsFromQuestion.QTAG5 == null ||
+			extractsFromQuestion.QTAG6 == null){
 			
 			extractionOfParameters(question,classifierResponse);
 		}
@@ -324,96 +366,56 @@ var cCalculatorModule = function (){
 
 				log('------------------');
 				log(extractsFromQuestion);
-
+console.log(extractsFromQuestion.QTAG1);
+console.log(extractsFromQuestion.RESTART);
+				console.log(currentQuestion);
+// console.log("testing here now anson kung");
 				if(extractsFromQuestion.RESTART != null && extractsFromQuestion.RESTART == 'yes'){
 					clearProfile();
 					showQuestion("RESTART_QUESTION");
 					extractsFromQuestion.RESTART = '';
 				}else if(extractsFromQuestion.RESTART != null && extractsFromQuestion.RESTART == 'no'){
 					clearProfile();
-					showQuestion("THANK_YOU");
+					showQuestion("BYE_BYE");
 					extractsFromQuestion.RESTART = '';
+				}else if(extractsFromQuestion.QTAG6 == 'negativeResponse'){
+					showQuestion("INVERTIGATE");
+					showQuestion("CARD_CANCEL");
+					showQuestion("RESTART");
+					clearProfile();
+				}else if(extractsFromQuestion.QTAG5 == 'positiveResponse'){
+					showQuestion("TRANSACTION_AUTH_1");
+					showQuestion("TRANSACTION_AUTH_2");
+				}else if(extractsFromQuestion.QTAG4 == 'positiveResponse'){
+					showQuestion("TRANSACTION");
+				}else if(extractsFromQuestion.QTAG4 == 'negativeResponse'){
+					showQuestion("CARD_CANCEL");
+					showQuestion("RESTART");
+					clearProfile();
+				}else if(extractsFromQuestion.QTAG3 == 'positiveResponse'){
+					showQuestion("CARD_REVIEW_1");
+					showQuestion("CARD_REVIEW_2");
+
+				}else if(extractsFromQuestion.QTAG1 == null &&
+						 extractsFromQuestion.RESTART == 'yes'){
+					showQuestion("HELLO");
+
+				}else if(extractsFromQuestion.QTAG1 == null &&
+						 extractsFromQuestion.RESTART == 'no'){
+					showQuestion("THANK_YOU");
+
 				}else if(extractsFromQuestion.QTAG1 == null){
-					showQuestion("ASK_FOR_COVERAGE");
-
+					showQuestion("LOST_CARD_1");
+					showQuestion("LOST_CARD_2");
+					showQuestion("LOST_CARD_3");
 				}else if(extractsFromQuestion.QTAG2 == null){
-					showQuestion("ASK_FOR_TYPE_HEALTH_INSURANCE");
+					showQuestion("BORN_LOCATION_1");
+					showQuestion("BORN_LOCATION_2");
 				}else if(extractsFromQuestion.QTAG1 != null && 
-						extractsFromQuestion.QTAG2 != null && 
-						extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "specialist" &&
-						extractsFromQuestion.SPECIALIST_SEARCH == null){
-						showQuestion("COVERAGE_DETAILS");
-						showQuestion("POLICY_SUMMARY");
-						showQuestion("SPECIALIST_SEARCH");
-				}else if(extractsFromQuestion.QTAG1 != null && 
-						extractsFromQuestion.QTAG2 != null && 
-						extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "physiotherapist" &&
-						extractsFromQuestion.PHYSIOTHERAPIST_COVERAGE == null){
-						showQuestion("NO_PHYSIOTHERAPIST_COVERAGE");
-						showQuestion("INFO_PHYSIOTHERAPIST_COVERAGE");
-				}else if(extractsFromQuestion.QTAG1 != null && 
-						extractsFromQuestion.QTAG2 != null && 
-						extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "physiotherapist" &&
-						extractsFromQuestion.PHYSIOTHERAPIST_COVERAGE == "yes"){
-						showQuestion("RELEVANT_POLICY");
-						showQuestion("HEALTH_POLICY_OPTION");
-						// TODO ANSON
-						//showQuestion("HEALTH_POLICY_OPTION");
-						showQuestion("RESTART");
-				}else if(extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "specialist" &&
-						extractsFromQuestion.SPECIALIST_SEARCH == "yes" &&
-						extractsFromQuestion.TYPE_OF_SPECIALIST == null){
-					showQuestion("TYPE_OF_SPECIALIST");
-				}else if(extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "specialist" &&
-						extractsFromQuestion.SPECIALIST_SEARCH == "no" &&
-						extractsFromQuestion.TYPE_OF_SPECIALIST == null){
-					showQuestion("RESTART");
-				}else if(extractsFromQuestion.QTAG1 == "outpatient" &&
-						extractsFromQuestion.QTAG2 == "specialist" &&
-						extractsFromQuestion.SPECIALIST_SEARCH == "yes" &&
-						extractsFromQuestion.TYPE_OF_SPECIALIST != null){
-					showQuestion("LIST_OF_DIABETES_DOC");
-					showQuestion({"showDoc":true});
-					showQuestion("RESTART");
-				}else if(extractsFromQuestion.QTAG3 == null){
-					showQuestion("ASK_FOR_OUT_PATIENT_SERVICE");
-				}else if(extractsFromQuestion.QTAG4 == null){
-					showQuestion("ASK_FOR_FINAL_SERVICE");
-				}else{
-					var request = {};
-					request.origin = extractsFromQuestion.QTAG1;
-					request.destination = extractsFromQuestion.QTAG2;
-					request.classType = extractsFromQuestion.QTAG3;
-					request.tierType = extractsFromQuestion.QTAG4;
-					request.infantType = extractsFromQuestion.QTAG5;
-
-					if(request.origin != null && 
-					   request.destination == 'outpatient' &&
-					   request.classType == 'chinese medicine practitioner' &&
-					   request.tierType == 'coverage'){
-					   callback("According to your policy, FWD medical insurance protects you with 30 times of network doctor visit or HK$100 claim for non-networked doctor visit within a year");
-					}
-
-					else if(request.origin != null && 
-					   request.destination == 'outpatient' &&
-					   request.classType == 'specialist' &&
-					   request.tierType == 'coverage'){
-					   callback("According to your policy, FWD medical insurance protects you with 30 times of network doctor visit or HK$200 claim for non-networked doctor visit within a year");
-					}
-
-					else if(request.origin != null && 
-					   request.destination == 'outpatient' &&
-					   request.classType == 'physician' &&
-					   request.tierType == 'claim'){
-					   callback("According to your policy, FWD medical insurance protects you with 30 times of network doctor visit or HK$250 claim for non-networked doctor visit within a year");
-					}else{
-						callback("According to your policy, FWD medical insurance protects you with 30 times of network doctor visit or HK$300 claim for non-networked doctor visit within a year");
-					}
+						extractsFromQuestion.QTAG2 != null &&
+						extractsFromQuestion.QTAG1 == "builtin.geography.city" &&
+						extractsFromQuestion.QTAG2 == "builtin.datetime.date"){
+					showQuestion("LOST_DATE");
 				}
            });
 	}
@@ -426,8 +428,30 @@ var cCalculatorModule = function (){
 		var sequence = require('sequence').Sequence.create();
 		sequence
 			.then(function(next) {
+				console.log('5555');
+					if(currentQuestion == ''){
+						console.log('got current question correct');
+						var entities = classifierResponse["entities"];
+						for(var i=0;i<entities.length;i++){
+							var entity = entities[i]['type'];
+							console.log("entity:::"+entity);
+							if (entity == "negativeResponse") {
+								extractsFromQuestion.RESTART = 'no';
+							} else if (entity == "positiveResponse") {
+								extractsFromQuestion.RESTART = 'yes';
+							}
+						}
+						callbackFunc();
+					}else{
+						next();
+					}
+				}
+			)
+			.then(function(next) {
 				console.log("currentQuestion");
 				console.log(currentQuestion);
+				console.log(extractsFromQuestion.QTAG1);
+				console.log("anson kung");
 				if(extractsFromQuestion.QTAG1 == null){
 					console.log("Enters in QTAG1 check...");
 					var entities = classifierResponse["entities"];
@@ -435,18 +459,11 @@ var cCalculatorModule = function (){
 					for(var i=0;i<entities.length;i++){
 						var entity = entities[i]['type'];
 						console.log("entity:::"+entity);
-						if(entity == "medicalBenefit"){
-							if(entity == "medicalBenefit" && entities[i]['entity'] == "outpatient"){
-									extractsFromQuestion.QTAG1 = entities[i]['entity'];
-									break;
-							}else if(entity == "medicalBenefit" && entities[i]['entity'] == "specialist"){
-									extractsFromQuestion.QTAG1 = "outpatient";
-									extractsFromQuestion.QTAG2 = entities[i]['entity'];
-									break;
-							}else{
-								callback("DO_NOT_UNDERSTAND");
-							}
-							break;
+						console.log((entity == "builtin.geography.city"));
+						if (entity == "builtin.geography.city") {
+							console.log('testing');
+							console.log(entities[i]['type']);
+							extractsFromQuestion.QTAG1 = entities[i]['type'];
 						}
 					}
 					callbackFunc();
@@ -456,21 +473,32 @@ var cCalculatorModule = function (){
 			})
 			.then(function(next) {
 					console.log('comes here in QTAG2 check...');
-					if(currentQuestion == 'ASK_FOR_TYPE_HEALTH_INSURANCE'){
+					if(currentQuestion == 'BORN_LOCATION_2'){
 						console.log('got current question correct');
 						var entities = classifierResponse["entities"];
 						for(var i=0;i<entities.length;i++){
 							var entity = entities[i]['type'];
 							console.log("entity:::"+entity);
-							if(entity == "medicalBenefit" && entities[i]['entity'] == "specialist"){
-									extractsFromQuestion.QTAG2 = entities[i]['entity'];
-									break;
-							}else if(entity == "medicalBenefit" && (entities[i]['entity'] == "physiotherapist") || 
-																	(entities[i]['entity'] == "physio") ||
-																	(entities[i]['entity'] == "physical therapy")){
-									extractsFromQuestion.QTAG2 = "physiotherapist";
-									break;
+							if (entity == "builtin.datetime.date") {
+								console.log('date');
+								console.log(entities[i]['entity']);
+								// log(QUESTIONS["LOST_DATE"]);
+								// log([ 'Thank you. So just to confirm, was the card lost as of yesterday' ]);
+								lostDate = entities[i]['entity'];
+								QUESTIONS["LOST_DATE"] = [ 'Thank you. So just to confirm, was the card lost as of ' + lostDate + '?'];
+								console.log(QUESTIONS);
+								// QUESTIONS["LOST_DATE"] = QUESTIONS["LOST_DATE"] + entities[i]['entity'];
+								extractsFromQuestion.QTAG2 = entities[i]['type'];
 							}
+							// if(entity == "medicalBenefit" && entities[i]['entity'] == "specialist"){
+							// 		extractsFromQuestion.QTAG2 = entities[i]['entity'];
+							// 		break;
+							// }else if(entity == "medicalBenefit" && (entities[i]['entity'] == "physiotherapist") || 
+							// 										(entities[i]['entity'] == "physio") ||
+							// 										(entities[i]['entity'] == "physical therapy")){
+							// 		extractsFromQuestion.QTAG2 = "physiotherapist";
+							// 		break;
+							// }
 						}
 						console.log("returns from qtag2 check");
 						callbackFunc();
@@ -481,11 +509,21 @@ var cCalculatorModule = function (){
 			)
 			.then(function(next) {
 					console.log('2222');
-					if(currentQuestion == 'SPECIALIST_SEARCH'){
-						if(question == "yes" || question == "sure" || question == "ofcourse"){
-							extractsFromQuestion.SPECIALIST_SEARCH = "yes";
-						}else{
-							extractsFromQuestion.SPECIALIST_SEARCH = "no";
+						console.log('testing??????');
+					if(currentQuestion == 'LOST_DATE'){
+						console.log('testing??????');
+						console.log('got current question correct');
+						var entities = classifierResponse["entities"];
+						for(var i=0;i<entities.length;i++){
+							var entity = entities[i]['type'];
+							console.log("entity:::"+entity);
+							console.log(entity);
+							if (entity == "positiveResponse") {
+						console.log('testing??????');
+								console.log('yes now');
+								extractsFromQuestion.QTAG3 = entity;
+								QUESTIONS["CARD_REVIEW_2"] = [ 'I do see, however, that there are some transactions dated since ' + lostDate + '. Would you like to review them?'];
+							}
 						}
 						callbackFunc();
 					}else{
@@ -495,17 +533,15 @@ var cCalculatorModule = function (){
 			)
 			.then(function(next) {
 				console.log('33333');
-					console.log("currentQuestion:::"+currentQuestion);
-					if(currentQuestion == 'TYPE_OF_SPECIALIST'){
+					if(currentQuestion == 'CARD_REVIEW_2'){
+						console.log('got current question correct');
 						var entities = classifierResponse["entities"];
-						console.log(entities);
 						for(var i=0;i<entities.length;i++){
 							var entity = entities[i]['type'];
-							console.log("GOT ENTTITY TYPE");
 							console.log("entity:::"+entity);
-							if(entity == "doc" && (entities[i]['entity'] == 'diabetes' || entities[i]['entity'] == 'metabolism')){
-								extractsFromQuestion.TYPE_OF_SPECIALIST = entities[i]['entity'];
-								break;
+							if (entity == "positiveResponse" || entity == "negativeResponse") {
+								extractsFromQuestion.QTAG4 = entity;
+								// QUESTIONS["CARD_REVIEW_2"] = [ 'I do see, however, that there are some transactions dated since ' + lostDate + '. Would you like to review them?'];
 							}
 						}
 						callbackFunc();
@@ -514,27 +550,36 @@ var cCalculatorModule = function (){
 					}
 				}
 			)
-			.then(function(next, result) {
+			.then(function(next) {
 				console.log('44444');
-				if(currentQuestion == 'RESTART'){
-					if(question == "yes" || question == "sure" || question == "ofcourse"){
-						extractsFromQuestion.RESTART = "yes";
+					if(currentQuestion == 'TRANSACTION'){
+						console.log('got current question correct');
+						var entities = classifierResponse["entities"];
+						for(var i=0;i<entities.length;i++){
+							var entity = entities[i]['type'];
+							console.log("entity:::"+entity);
+							if (entity == "positiveResponse") {
+								extractsFromQuestion.QTAG5 = entity;
+								// QUESTIONS["CARD_REVIEW_2"] = [ 'I do see, however, that there are some transactions dated since ' + lostDate + '. Would you like to review them?'];
+							}
+						}
+						callbackFunc();
 					}else{
-						extractsFromQuestion.RESTART = "no";
+						next();
 					}
-					callbackFunc();
-				}else{
-					next();
-				}
 			})
 			.then(function(next) {
 				console.log('5555');
-					console.log("currentQuestion:::"+currentQuestion);
-					if(currentQuestion == 'INFO_PHYSIOTHERAPIST_COVERAGE'){
-						if(question == "yes" || question == "sure" || question == "ofcourse"){
-							extractsFromQuestion.PHYSIOTHERAPIST_COVERAGE = "yes";
-						}else{
-							extractsFromQuestion.PHYSIOTHERAPIST_COVERAGE = "no";
+					if(currentQuestion == 'TRANSACTION_AUTH_2'){
+						console.log('got current question correct');
+						var entities = classifierResponse["entities"];
+						for(var i=0;i<entities.length;i++){
+							var entity = entities[i]['type'];
+							console.log("entity:::"+entity);
+							if (entity == "negativeResponse") {
+								extractsFromQuestion.QTAG6 = entity;
+								// QUESTIONS["CARD_REVIEW_2"] = [ 'I do see, however, that there are some transactions dated since ' + lostDate + '. Would you like to review them?'];
+							}
 						}
 						callbackFunc();
 					}else{
@@ -576,7 +621,8 @@ var cCalculatorModule = function (){
 	    extractsFromQuestion.QTAG2 = null;
 		extractsFromQuestion.QTAG3 = null;
 		extractsFromQuestion.QTAG4 = null;
-		extractsFromQuestion.QTAG5 = 'yes';
+		extractsFromQuestion.QTAG5 = null;
+		extractsFromQuestion.QTAG6 = null;
 		extractsFromQuestion.INTENT = null;
 		extractsFromQuestion.SPECIALIST_SEARCH=null;
 		extractsFromQuestion.TYPE_OF_SPECIALIST=null;
