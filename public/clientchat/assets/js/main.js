@@ -23,24 +23,78 @@ var additionalInfoBodyID= "additional-information-body-";
 var autocorrect_id_counter = 0;
 var autocorrections = [];
 
-var file = "mrwoo.txt";
-var rawFile = new XMLHttpRequest();
-    rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function ()
-    {
-        if(rawFile.readyState === 4)
-        {
-            if(rawFile.status === 200 || rawFile.status == 0)
-            {
-                var allText = rawFile.responseText;
-                $('.chat-list').html(allText);
-            }
-            else {
-            	console.log(file);
-            }
+
+function createCookie(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+    }
+    else var expires = "";               
+
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+    console.log(readCookie);
+}
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
         }
     }
-    rawFile.send(null);
+};
+
+var erase = getUrlParameter('erase');
+console.log(erase);
+console.log(erase == 'true');
+if (erase == 'true') {
+	eraseCookie('chatHistory');
+}
+
+	// alert(readCookie('chatHistory'));
+// $.cookie("example", "foo" , ); // Sample 1
+
+if (readCookie('chatHistory') == 'loaded') {
+	var file = "mrwoo.txt";
+	var rawFile = new XMLHttpRequest();
+	    rawFile.open("GET", file, false);
+	    rawFile.onreadystatechange = function ()
+	    {
+	        if(rawFile.readyState === 4)
+	        {
+	            if(rawFile.status === 200 || rawFile.status == 0)
+	            {
+	                var allText = rawFile.responseText;
+	                $('.chat-list').html(allText);
+	            }
+	            else {
+	            	console.log(file);
+	            }
+	        }
+	    }
+	    rawFile.send(null);
+}
 
  makeTextFile = function (text) {
     var data = new Blob([text], {type: 'text/plain'});
@@ -239,6 +293,9 @@ function sendMessage(message_input, chat_window) {
 	//Clear message_input and reset height
 	$(message_input).val('');
 	$(message_input).attr('style', '');
+
+createCookie('chatHistory', 'loaded', '1');
+// alert(readCookie('chatHistory'));
 }
 
 
@@ -460,6 +517,16 @@ console.log('time:' + chat_message_timestamp);
 
 	$(".chat-block").last().append(bubble_content).find('.chat-bubble').fadeIn('slow');
 	$(chat_window).scrollTop($(chat_window)[0].scrollHeight);
+
+	// console.log( $('.chat-list').html());
+	// var chatHistory = $('.chat-list').html();
+	// $.session.set('some key', 'a value');
+
+	// console.log($.session.get('some key'));
+	// alert(chatHistory);
+	// eraseCookie('chatHistory');
+	// createCookie('chatHistory', chatHistory, '1');
+	// alert(readCookie('chatHistory'));
 }
 
 function feedbackHandler(target) {
