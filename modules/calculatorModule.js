@@ -462,6 +462,8 @@ console.log(extractsFromQuestion.RESTART);
 						console.log((entity == "newyork"));
 						if (entity == "newyork") {
 							console.log('testing');
+							QUESTIONS["BORN_LOCATION_1"] = [ 'Great. New york is really a great city. Thank you, Mr. Woo.'];
+							
 							console.log(entities[i]['type']);
 							extractsFromQuestion.QTAG1 = entities[i]['type'];
 						}
