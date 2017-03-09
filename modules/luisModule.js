@@ -1,5 +1,6 @@
 var cNlcModule = function() {
     const USE_LUIS_PREVIEW_MODE = false;
+    const translate = require('google-translate-api');
 
     var that = {};
     
@@ -47,7 +48,17 @@ var cNlcModule = function() {
     var requestNlc = function(q,successCallback, failureCallback){
         // console.log(q);
         q = qs.escape(q);
-        var url = luisURL+luisID+'?subscription-key='+subscriptionkey+'&verbose=true&q='+q;
+        var url = luisURL+luisID+'?subscription-key='+subscriptionkey+'&verbose=true&q=';
+        console.log('translating.......');
+        translate(decodeURIComponent(q), {from: 'zh-TW', to: 'en'}).then(res => {
+            // console.log(res);
+            console.log(res.text);
+            console.log('testing again');
+            q = res.text;
+            url = url + res.text;
+            console.log(url);
+
+        
         var opt = {
          url:url,
          method:'GET',
@@ -85,6 +96,18 @@ var cNlcModule = function() {
           failureCallback('429');        
         }
        });
+       
+            // console.log(q);
+            //=> Ik spea Nederlands!
+            // console.log(res.from.text.autoCorrected);
+            // //=> false
+            // console.log(res.from.text.value);
+            // //=> I [speak] Dutch!
+            // console.log(res.from.text.didYouMean);
+            //=> true
+        }).catch(err => {
+            console.error(err);
+        });
     }
 
     that.splitDataSets = function(){

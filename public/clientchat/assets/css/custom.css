@@ -916,7 +916,7 @@ ul.chat-list .timestamp {
     height: 154px;
   margin: 7px auto 0 auto;
     background-size: 305px 90px;
-    background: url("../img/icon/logo-cx-header-web@2x.png");
+    /*background: url("../img/icon/logo-cx-header-web@2x.png");*/
     background-repeat: no-repeat;
     zoom: 0.25;
 }
@@ -927,7 +927,7 @@ ul.chat-list .timestamp {
     height: 154px;
     margin-top: 10px;
     background-size: 305px 90px;
-    background: url("../img/icon/logo-cx-header-web@2x.png");
+    /*background: url("../img/icon/logo-cx-header-web@2x.png");*/
     background-repeat: no-repeat;
     float: left;
     zoom: 0.5;
