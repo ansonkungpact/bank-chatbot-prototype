@@ -57,54 +57,45 @@ var cNlcModule = function() {
             q = res.text;
             url = url + res.text;
             console.log(url);
-
         
-        var opt = {
-         url:url,
-         method:'GET',
-        }
-       request(opt, function (err, response, body) {
-        try {
-          var result = JSON.parse(body);
-          // console.log(body,moduleName,isLog);
-          var topScoringIntent = result["topScoringIntent"];
-
-          if (!USE_LUIS_PREVIEW_MODE) {
-            // production mode
-            var intents = result["intents"];
-            if (intents && Array.isArray(intents) && intents.length > 0) {
-              topScoringIntent = intents[0];
+            var opt = {
+             url:url,
+             method:'GET',
             }
-          }
 
-          if (topScoringIntent && topScoringIntent["intent"]) {
-            var tempResult = {};
-            tempResult["intent"] = topScoringIntent["intent"];
-            tempResult["entities"] = result["entities"];
-            // console.log(tempResult,moduleName,isLog);
-            successCallback(tempResult);
-          }
-          else if (result.statusCode == 429){
-            failureCallback('429');
-          }
-          else {
-            failureCallback(result.message);
-          }
-        } 
-        catch (e) {
-          // console.log(e);
-          failureCallback('429');        
-        }
-       });
-       
-            // console.log(q);
-            //=> Ik spea Nederlands!
-            // console.log(res.from.text.autoCorrected);
-            // //=> false
-            // console.log(res.from.text.value);
-            // //=> I [speak] Dutch!
-            // console.log(res.from.text.didYouMean);
-            //=> true
+            request(opt, function (err, response, body) {
+              try {
+                var result = JSON.parse(body);
+                // console.log(body,moduleName,isLog);
+                var topScoringIntent = result["topScoringIntent"];
+
+                if (!USE_LUIS_PREVIEW_MODE) {
+                  // production mode
+                  var intents = result["intents"];
+                  if (intents && Array.isArray(intents) && intents.length > 0) {
+                    topScoringIntent = intents[0];
+                  }
+                }
+
+                if (topScoringIntent && topScoringIntent["intent"]) {
+                  var tempResult = {};
+                  tempResult["intent"] = topScoringIntent["intent"];
+                  tempResult["entities"] = result["entities"];
+                  // console.log(tempResult,moduleName,isLog);
+                  successCallback(tempResult);
+                }
+                else if (result.statusCode == 429){
+                  failureCallback('429');
+                }
+                else {
+                  failureCallback(result.message);
+                }
+              } 
+              catch (e) {
+                // console.log(e);
+                failureCallback('429');        
+              }
+            });
         }).catch(err => {
             console.error(err);
         });

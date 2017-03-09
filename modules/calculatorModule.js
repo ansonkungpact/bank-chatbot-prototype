@@ -413,7 +413,7 @@ console.log(extractsFromQuestion.RESTART);
 					showQuestion("BORN_LOCATION_2");
 				}else if(extractsFromQuestion.QTAG1 != null && 
 						extractsFromQuestion.QTAG2 != null &&
-						extractsFromQuestion.QTAG1 == "builtin.geography.city" &&
+						extractsFromQuestion.QTAG1 == "newyork" &&
 						extractsFromQuestion.QTAG2 == "builtin.datetime.date"){
 					showQuestion("LOST_DATE");
 				}
@@ -459,8 +459,8 @@ console.log(extractsFromQuestion.RESTART);
 					for(var i=0;i<entities.length;i++){
 						var entity = entities[i]['type'];
 						console.log("entity:::"+entity);
-						console.log((entity == "builtin.geography.city"));
-						if (entity == "builtin.geography.city") {
+						console.log((entity == "newyork"));
+						if (entity == "newyork") {
 							console.log('testing');
 							console.log(entities[i]['type']);
 							extractsFromQuestion.QTAG1 = entities[i]['type'];

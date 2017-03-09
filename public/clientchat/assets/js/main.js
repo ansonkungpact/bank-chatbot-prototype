@@ -23,6 +23,39 @@ var additionalInfoBodyID= "additional-information-body-";
 var autocorrect_id_counter = 0;
 var autocorrections = [];
 
+var file = "mrwoo.txt";
+var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+                $('.chat-list').html(allText);
+            }
+            else {
+            	console.log(file);
+            }
+        }
+    }
+    rawFile.send(null);
+
+ makeTextFile = function (text) {
+    var data = new Blob([text], {type: 'text/plain'});
+
+    // If we are replacing a previously generated file we need to
+    // manually revoke the object URL to avoid memory leaks.
+    if (textFile !== null) {
+      window.URL.revokeObjectURL(textFile);
+    }
+
+    textFile = window.URL.createObjectURL(data);
+
+    return textFile;
+  };
+
 // INIT Functions
 function init() {
 
@@ -40,7 +73,7 @@ function init() {
 		platform = 'WEB';
 		$(".chat-header").removeClass('hidden');
 		$(".chat-header-mobile").addClass('hidden');
-		copyright_link = COPY_RIGHT+' </a>© FTLife Limited';
+		copyright_link = COPY_RIGHT+' </a>© China CITIC Bank International Limited';
 	}
 
 	//add copyright
@@ -264,6 +297,8 @@ function makeChatBubble (chat_message, chat_message_timestamp, chat_window, user
 		chat_bubble_id = 'id="' + chat_bubble_id + '"';	
 	}
 
+console.log('testing time now ');
+console.log(chat_message_timestamp);
 	if (vera_typing == true ) {
 		if (!isChatBubbleShowing) {
 			isChatBubbleShowing = true;
@@ -413,6 +448,10 @@ function makeChatBubble (chat_message, chat_message_timestamp, chat_window, user
 			'<div class="chat-bubble-tail"></div></li>';
 		}else{
 			var bubble_content = '<li ' + chat_bubble_id + 'class="chat-bubble ' + user + ' ' + custom_class + '" style="display: none;"> <span class="sr-only">' + sr_users[user] + ': </span>' + chat_message + '<div class="timestamp"><time datetime="' + chat_message_timestamp + '">' + chat_message_timestamp +  '</div><div class="chat-bubble-tail"></div></li>';
+		
+console.log('msg:' + chat_message);
+console.log('time:' + chat_message_timestamp);
+
 		}
 		if (user == "vera") {
 			$('.vera-message-audio')[0].play();

@@ -912,11 +912,11 @@ ul.chat-list .timestamp {
 
 /* line 984, custom.scss */
 .header_img_left {
-    width: 103px;
+    width: 115px;
     height: 154px;
-  margin: 7px auto 0 auto;
+  margin: 25px auto 0 auto;
     background-size: 305px 90px;
-    /*background: url("../img/icon/logo-cx-header-web@2x.png");*/
+    background: url("../img/icon/logo-cx-header-web@2x.png");
     background-repeat: no-repeat;
     zoom: 0.25;
 }
@@ -925,9 +925,9 @@ ul.chat-list .timestamp {
   .header_img_left {
     width: 700px;
     height: 154px;
-    margin-top: 10px;
+    margin-top: 30px;
     background-size: 305px 90px;
-    /*background: url("../img/icon/logo-cx-header-web@2x.png");*/
+    background: url("../img/icon/logo-cx-header-web@2x.png");
     background-repeat: no-repeat;
     float: left;
     zoom: 0.5;
